@@ -11,7 +11,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  String imgUrl = "";
+  String imgUrl = "images/c.jpg";
   int memeNo = 0;
   bool isLoading = true;
   int targetMeme = 20;
@@ -27,7 +27,7 @@ class _MainScreenState extends State<MainScreen> {
     if (savedMemeNo != null) {
       setState(() {
         memeNo = savedMemeNo;
-        if (memeNo > 20 && memeNo <= 100) {
+        if (memeNo > 20) {
           targetMeme = 100;
         } else if (memeNo > 100) {
           targetMeme = 500;
@@ -42,24 +42,34 @@ class _MainScreenState extends State<MainScreen> {
     });
 
     String getImgUrl = await FetchMeme().fetchNewMeme();
-    setState(() {
-      imgUrl = getImgUrl;
-      memeNo++;
-      if (memeNo > 20 && memeNo <= 500) {
-        targetMeme = 500;
-      } else if (memeNo > 500) {
-        targetMeme = 1000;
-      }
-      isLoading = false;
-    });
-    SaveMyData.saveData(memeNo);
+
+    if (getImgUrl.isNotEmpty) {
+      setState(() {
+        imgUrl = getImgUrl;
+        memeNo++;
+        if (memeNo > 20 && memeNo <= 500) {
+          targetMeme = 500;
+        } else if (memeNo > 500) {
+          targetMeme = 1000;
+        }
+        isLoading = false;
+      });
+      SaveMyData.saveData(memeNo);
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load image')),
+      );
+    }
   }
 
   void resetMeme() {
     setState(() {
       memeNo = 0;
       targetMeme = 20;
-      imgUrl = "";
+      imgUrl = "images/c.jpg"; // Resetting to default image
     });
     SaveMyData.saveData(memeNo);
   }
@@ -129,7 +139,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: MediaQuery.of(context).size.width,
                   child: Image.network(
                     imgUrl,
-                     fit: BoxFit.cover,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 SizedBox(
@@ -177,7 +187,6 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ],
                 ),
-
               ],
             ),
           ),
